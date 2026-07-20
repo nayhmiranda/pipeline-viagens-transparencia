@@ -1,0 +1,18 @@
+# Credenciais
+.env
+
+# Dados baixados / brutos (não versionar)
+*.zip
+*.csv
+data/
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+venv/
+.venv/
+
+# SO / editor
+.DS_Store
+.vscode/
