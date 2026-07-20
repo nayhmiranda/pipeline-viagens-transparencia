@@ -1,9 +1,9 @@
 -- ==========================================================
--- 0_criar_banco.sql
 -- Pipeline de Viagens a Serviço - Portal da Transparência
 -- Arquitetura Medallion (Raw -> Silver -> Gold)
 -- Banco: PostgreSQL
 -- ==========================================================
+-- OBSERVAÇÕES:
 -- Rode "CREATE DATABASE viagens_servico;" separadamente (fora
 -- de uma transação) e depois conecte nele antes de rodar este
 -- script, ex.: psql -U seu_usuario -d viagens_servico -f 0_criar_banco.sql
@@ -169,7 +169,7 @@ CREATE TABLE silver_trecho (
 
 -- ==========================================================
 -- Índices auxiliares nas FKs (melhora performance dos JOINs
--- na camada Gold; não é exigido mas é boa prática)
+-- na camada Gold
 -- ==========================================================
 CREATE INDEX idx_pagamento_id_viagem ON silver_pagamento(id_viagem);
 CREATE INDEX idx_passagem_id_viagem  ON silver_passagem(id_viagem);

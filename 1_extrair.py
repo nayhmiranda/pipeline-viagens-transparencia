@@ -1,14 +1,13 @@
 """
-1_extrair.py
-------------
 Fase 1 do pipeline (camada Raw).
 
 Baixa o .zip do Google Drive (config.DRIVE_FILE_ID), extrai os 4 CSVs e
 carrega o conteudo, SEM QUALQUER TRANSFORMACAO, nas tabelas Raw.
 
-- Idempotente: faz TRUNCATE na tabela antes de recarregar, entao rodar o
+OBSERVAÇÕES IMPORTANTES:
+- faz TRUNCATE na tabela antes de recarregar, entao rodar o
   script varias vezes nao duplica registros.
-- Resiliente: cada arquivo e carregado dentro de um try/except; um erro em
+- cada arquivo e carregado dentro de um try/except; um erro em
   um CSV nao derruba o carregamento dos demais.
 """
 
@@ -83,14 +82,14 @@ def baixar_e_extrair_zip():
 
 
 def carregar_csv_na_raw(conexao, chave, info):
-    """Le um CSV em blocos e insere (sem transformar) na tabela Raw correspondente."""
+    #Leitura de um CSV em blocos e insere (sem transformar) na tabela Raw correspondente
     caminho_csv = PASTA_DADOS / info["csv"]
     tabela = info["tabela_raw"]
     colunas = COLUNAS_RAW[chave]
     placeholders = ", ".join(["%s"] * len(colunas))
     sql_insert = f"INSERT INTO {tabela} ({', '.join(colunas)}) VALUES ({placeholders})"
 
-    # Idempotente: limpa a tabela antes de recarregar (evita duplicar em reexecucoes)
+    #limpa a tabela antes de recarregar (evita duplicar em reexecucoes)
     executar(conexao, f"TRUNCATE TABLE {tabela}")
 
     leitor = pd.read_csv(
@@ -99,7 +98,7 @@ def carregar_csv_na_raw(conexao, chave, info):
         encoding=CSV_ENCODING,
         header=0,               # pula a linha de cabecalho original do CSV
         names=colunas,           # renomeia posicionalmente para os nomes da Raw
-        dtype=str,               # Raw: tudo como texto, sem conversao de tipo
+        dtype=str,               # tudo como texto, sem conversao de tipo
         keep_default_na=False,
         na_values=[""],          # string vazia vira nulo (NULL no banco)
         chunksize=TAMANHO_BLOCO,
@@ -127,7 +126,7 @@ def main():
                 total = carregar_csv_na_raw(conexao, chave, info)
                 print(f"OK: {total} linhas carregadas em {info['tabela_raw']}")
             except Exception as erro:
-                # Resiliente: um erro num arquivo nao interrompe os demais
+                # previne que um erro num arquivo nao interrompe os demais
                 print(f"ERRO ao carregar {info['csv']}: {erro}", file=sys.stderr)
                 conexao.rollback()
     finally:
